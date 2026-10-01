@@ -43,7 +43,8 @@ env:
   #signing keys env variable checks
   UPLOAD_ARTIFACT: "true"
   SIGN_BASE_URL: "-2"
-  AZURE_CLIENT_ID: "${{ secrets.AZURE_CLIENT_ID }}"
+  WINDOWS_PFX_BASE64: "${{ secrets.WINDOWS_PFX_BASE64 }}"
+  WINDOWS_PFX_PASSWORD: "${{ secrets.WINDOWS_PFX_PASSWORD }}"
 
 
 jobs:
@@ -305,22 +306,17 @@ jobs:
           path: rustdesk
 
       - name: Sign ShercoRemoto files
-        # Azure Trusted Signing; skipped until the AZURE_* secrets are set on the repo
-        if: env.AZURE_CLIENT_ID != ''
-        uses: azure/trusted-signing-action@v0
-        with:
-          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
-          endpoint: ${{ secrets.AZURE_SIGNING_ENDPOINT }}
-          trusted-signing-account-name: ${{ secrets.AZURE_SIGNING_ACCOUNT }}
-          certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE }}
-          files-folder: ${{ github.workspace }}\rustdesk
-          files-folder-filter: exe,dll
-          files-folder-recurse: true
-          file-digest: SHA256
-          timestamp-rfc3161: http://timestamp.acs.microsoft.com
-          timestamp-digest: SHA256
+        # Signs with the ShercoIT certificate stored in the WINDOWS_PFX_* repo secrets
+        if: env.WINDOWS_PFX_BASE64 != ''
+        shell: pwsh
+        run: |
+          $signtool = Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin\*\x64\signtool.exe" | Sort-Object FullName -Descending | Select-Object -First 1
+          $pfx = Join-Path $env:RUNNER_TEMP "codesign.pfx"
+          [IO.File]::WriteAllBytes($pfx, [Convert]::FromBase64String($env:WINDOWS_PFX_BASE64))
+          $files = Get-ChildItem -Path "./rustdesk/*" -Include *.exe,*.dll | Where-Object { (Get-AuthenticodeSignature $_.FullName).Status -eq 'NotSigned' } | ForEach-Object { $_.FullName }
+          & $signtool.FullName sign /f $pfx /p $env:WINDOWS_PFX_PASSWORD /fd SHA256 /td SHA256 /tr http://timestamp.digicert.com /d "ShercoRemoto" $files
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Remove-Item $pfx
 
       - name: Build self-extracted executable
         shell: bash
@@ -362,22 +358,17 @@ jobs:
           sha256sum ../../SignOutput/shercoremoto-*.msi
 
       - name: Sign ShercoRemoto installers
-        # Azure Trusted Signing; skipped until the AZURE_* secrets are set on the repo
-        if: env.AZURE_CLIENT_ID != ''
-        uses: azure/trusted-signing-action@v0
-        with:
-          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
-          endpoint: ${{ secrets.AZURE_SIGNING_ENDPOINT }}
-          trusted-signing-account-name: ${{ secrets.AZURE_SIGNING_ACCOUNT }}
-          certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE }}
-          files-folder: ${{ github.workspace }}\SignOutput
-          files-folder-filter: exe,msi
-          files-folder-recurse: true
-          file-digest: SHA256
-          timestamp-rfc3161: http://timestamp.acs.microsoft.com
-          timestamp-digest: SHA256
+        # Signs with the ShercoIT certificate stored in the WINDOWS_PFX_* repo secrets
+        if: env.WINDOWS_PFX_BASE64 != ''
+        shell: pwsh
+        run: |
+          $signtool = Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin\*\x64\signtool.exe" | Sort-Object FullName -Descending | Select-Object -First 1
+          $pfx = Join-Path $env:RUNNER_TEMP "codesign.pfx"
+          [IO.File]::WriteAllBytes($pfx, [Convert]::FromBase64String($env:WINDOWS_PFX_BASE64))
+          $files = Get-ChildItem -Path "./SignOutput/*" -Include *.exe,*.msi | Where-Object { (Get-AuthenticodeSignature $_.FullName).Status -eq 'NotSigned' } | ForEach-Object { $_.FullName }
+          & $signtool.FullName sign /f $pfx /p $env:WINDOWS_PFX_PASSWORD /fd SHA256 /td SHA256 /tr http://timestamp.digicert.com /d "ShercoRemoto" $files
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Remove-Item $pfx
 
       - name: Publish Release
         uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
