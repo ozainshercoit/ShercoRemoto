@@ -2580,15 +2580,27 @@ class _AboutState extends State<_About> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Basado en RustDesk (AGPL-3.0) © Purslane Tech Pte. Ltd.\n$license',
-                            style: const TextStyle(color: Colors.white),
-                          ),
-                          Text(
                             'ShercoRemoto creado por Ozain Giannelli',
                             style: TextStyle(
                                 fontWeight: FontWeight.w800,
                                 color: Colors.white),
-                          )
+                          ),
+                          Text(
+                            'Desarrollado por Copyright © Forzinova',
+                            style: const TextStyle(color: Colors.white),
+                          ).marginOnly(top: 4),
+                          // AGPL-3.0 section 5(d): keep an appropriate legal notice and the source location
+                          InkWell(
+                            onTap: () => launchUrlString(
+                                'https://github.com/ozainshercoit/ShercoRemoto'),
+                            child: Text(
+                              'Software libre bajo licencia AGPL-3.0 · Código fuente\n$license',
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 11,
+                                  decoration: TextDecoration.underline),
+                            ),
+                          ).marginOnly(top: 10),
                         ],
                       ),
                     ),

@@ -3731,7 +3731,8 @@ Color? disabledTextColor(BuildContext context, bool enabled) {
 }
 
 Widget loadPowered(BuildContext context) {
-  if (bind.mainGetBuildinOption(key: "hide-powered-by-me") == 'Y') {
+  // ShercoRemoto: no "powered by" line in the UI
+  if (true) {
     return SizedBox.shrink();
   }
   return MouseRegion(
