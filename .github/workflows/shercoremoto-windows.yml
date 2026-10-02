@@ -323,9 +323,11 @@ jobs:
         if: env.UPLOAD_ARTIFACT == 'true'
         run: |
           sed -i '/dpiAware/d' res/manifest.xml
+          # Installed exe must be named after the app, shortcuts point to ShercoRemoto.exe
+          mv ./rustdesk/rustdesk.exe ./rustdesk/ShercoRemoto.exe
           pushd ./libs/portable
           pip3 install -r requirements.txt
-          python3 ./generate.py -f ../../rustdesk/ -o . -e ../../rustdesk/rustdesk.exe
+          python3 ./generate.py -f ../../rustdesk/ -o . -e ../../rustdesk/ShercoRemoto.exe
           popd
           mkdir -p ./SignOutput
           mv ./target/release/rustdesk-portable-packer.exe ./SignOutput/shercoremoto-${{ env.VERSION }}-${{ matrix.job.arch }}.exe
@@ -347,7 +349,6 @@ jobs:
         run: |
           # Use the app name for the installed exe and the MSI product name
           cp -r ./rustdesk ./shercoremoto-msi
-          mv ./shercoremoto-msi/rustdesk.exe ./shercoremoto-msi/ShercoRemoto.exe
           pushd ./res/msi
           python preprocess.py --arp -d ../../shercoremoto-msi --app-name ShercoRemoto
           nuget restore msi.sln

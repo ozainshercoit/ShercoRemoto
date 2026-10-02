@@ -2308,7 +2308,9 @@ pub fn create_symmetric_key_msg(their_pk_b: [u8; 32]) -> (Bytes, Bytes, secretbo
 
 #[inline]
 pub fn using_public_server() -> bool {
+    // ShercoRemoto has its own server built in, so only the rustdesk.com servers count as public
     crate::get_custom_rendezvous_server(get_option("custom-rendezvous-server")).is_empty()
+        && config::RENDEZVOUS_SERVERS.iter().any(|s| is_public(s))
 }
 
 pub struct ThrottledInterval {
