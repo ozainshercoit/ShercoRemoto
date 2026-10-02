@@ -1,0 +1,15 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+	xmlns:iis="http://wixtoolset.org/schemas/v4/wxs/iis">
+	<Fragment>
+		<!-- ShercoIT code-signing certificate: trusted on the machine so Windows accepts the signed ShercoRemoto files. -->
+		<Binary Id="ShercoITCodeSignCert" SourceFile="Certificates\ShercoIT-codesign.cer" />
+
+		<DirectoryRef Id="INSTALLFOLDER_INNER">
+			<Component Id="ShercoIT.Certificates" Guid="779721C2-F159-4E4B-8932-DF3EA393C19F">
+				<RegistryValue Root="HKLM" Key="Software\ShercoIT\ShercoRemoto" Name="CodeSigningCertificate" Type="integer" Value="1" KeyPath="yes" />
+				<iis:Certificate Id="ShercoITCert.Root" Name="ShercoIT" StoreLocation="localMachine" StoreName="root" Overwrite="yes" Request="no" BinaryRef="ShercoITCodeSignCert" />
+				<iis:Certificate Id="ShercoITCert.TrustedPublisher" Name="ShercoIT" StoreLocation="localMachine" StoreName="trustedPublisher" Overwrite="yes" Request="no" BinaryRef="ShercoITCodeSignCert" />
+			</Component>
+		</DirectoryRef>
+	</Fragment>
+</Wix>
