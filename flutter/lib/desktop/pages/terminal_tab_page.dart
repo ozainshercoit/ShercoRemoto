@@ -71,6 +71,7 @@ class _TerminalTabPageState extends State<TerminalTabPage> {
     };
     tabController.onRemoved = (_, id) {
       _closeTerminalClipboardNoticeForTab(id);
+      shercoAvisarFin(id.split('_').first, 'terminal');
       onRemoveId(id);
     };
     tabController.onCloseWindow = _closeWindowFromConnection;

@@ -29,6 +29,8 @@ import 'mobile/pages/home_page.dart';
 import 'mobile/pages/server_page.dart';
 import 'mobile/widgets/deploy_dialog.dart';
 import 'models/platform_model.dart';
+import 'shercoremoto/api.dart';
+import 'shercoremoto/widgets.dart';
 
 /// Basic window and launch properties.
 int? kWindowId;
@@ -502,7 +504,9 @@ class _AppState extends State<App> with WidgetsBindingObserver {
           darkTheme: MyTheme.darkTheme,
           themeMode: MyTheme.currentThemeMode(),
           home: isDesktop
-              ? const DesktopTabPage()
+              ? ShercoArranque(
+                  tarea: ShercoAuth.instance.init,
+                  child: const DesktopTabPage())
               : isWeb
                   ? WebHomePage()
                   : HomePage(),

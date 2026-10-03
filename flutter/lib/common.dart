@@ -40,6 +40,9 @@ import 'desktop/pages/view_camera_page.dart' as desktop_view_camera;
 import 'package:flutter_hbb/desktop/widgets/remote_toolbar.dart';
 import 'models/model.dart';
 import 'models/platform_model.dart';
+import 'shercoremoto/api.dart';
+import 'shercoremoto/login.dart';
+import 'shercoremoto/widgets.dart';
 
 import 'package:flutter_hbb/native/win32.dart'
     if (dart.library.html) 'package:flutter_hbb/web/win32.dart';
@@ -249,16 +252,16 @@ class MyTheme {
   MyTheme._();
 
   static const Color grayBg = Color(0xFFEFEFF2);
-  static const Color accent = Color(0xFF0071FF);
-  static const Color accent50 = Color(0x770071FF);
-  static const Color accent80 = Color(0xAA0071FF);
+  static const Color accent = Color(0xFF1673E0);
+  static const Color accent50 = Color(0x771673E0);
+  static const Color accent80 = Color(0xAA1673E0);
   static const Color canvasColor = Color(0xFF212121);
   static const Color border = Color(0xFFCCCCCC);
-  static const Color idColor = Color(0xFF00B6F0);
+  static const Color idColor = Color(0xFF1673E0);
   static const Color darkGray = Color.fromARGB(255, 148, 148, 148);
   static const Color cmIdColor = Color(0xFF21790B);
   static const Color dark = Colors.black87;
-  static const Color button = Color(0xFF2C8CFF);
+  static const Color button = Color(0xFF1673E0);
   static const Color hoverBorder = Color(0xFF999999);
 
   // ListTile
@@ -905,6 +908,23 @@ class OverlayDialogManager {
         }
       }
 
+      // ShercoRemoto: connecting animation
+      if (text == 'Connecting...' && isDesktop) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: SizedBox(
+              width: 440,
+              height: 400,
+              child: ShercoCargando(
+                  texto: 'Iniciando conexión remota…',
+                  onCancel: showCancel ? cancel : null),
+            ),
+          ),
+        );
+      }
       return CustomAlertDialog(
         content: Container(
             constraints: const BoxConstraints(maxWidth: 240),
@@ -2562,6 +2582,32 @@ connectMainDesktop(String id,
         isSharedPassword: isSharedPassword,
         forceRelay: forceRelay);
   }
+  // ShercoRemoto: log the connection in ShercoIT (closed by kWindowShercoFin)
+  ShercoAuth.instance.conexionInicio(id, shercoTipoConexion(
+      isFileTransfer: isFileTransfer,
+      isViewCamera: isViewCamera,
+      isTerminal: isTerminal,
+      isPort: isTcpTunneling || isRDP));
+}
+
+/// Session windows ask the main window to close the logged connection.
+void shercoAvisarFin(String id, String tipo) async {
+  try {
+    await rustDeskWinManager
+        .call(WindowType.Main, kWindowShercoFin, {'id': id, 'tipo': tipo});
+  } catch (_) {}
+}
+
+String shercoTipoConexion(
+    {bool isFileTransfer = false,
+    bool isViewCamera = false,
+    bool isTerminal = false,
+    bool isPort = false}) {
+  if (isFileTransfer) return 'archivos';
+  if (isViewCamera) return 'camara';
+  if (isTerminal) return 'terminal';
+  if (isPort) return 'puerto';
+  return 'escritorio';
 }
 
 /// Connect to a peer with [id].
@@ -2601,6 +2647,8 @@ connect(BuildContext context, String id,
 
   if (isDesktop) {
     if (desktopType == DesktopType.main) {
+      // ShercoRemoto: connecting to other computers needs a ShercoIT account
+      if (!await shercoPuedeConectar(context)) return;
       await connectMainDesktop(
         id,
         isFileTransfer: isFileTransfer,

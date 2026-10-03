@@ -34,7 +34,10 @@ class _PortForwardTabPageState extends State<PortForwardTabPage> {
       WindowController.fromWindowId(windowId())
           .setTitle(getWindowNameWithId(id));
     };
-    tabController.onRemoved = (_, id) => onRemoveId(id);
+    tabController.onRemoved = (_, id) {
+      shercoAvisarFin(id, 'puerto');
+      onRemoveId(id);
+    };
     tabController.add(TabInfo(
         key: params['id'],
         label: params['id'],

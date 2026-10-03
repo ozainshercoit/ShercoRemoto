@@ -106,7 +106,10 @@ class _ViewCameraTabPageState extends State<ViewCameraTabPage> {
       ));
       _update_remote_count();
     }
-    tabController.onRemoved = (_, id) => onRemoveId(id);
+    tabController.onRemoved = (_, id) {
+      shercoAvisarFin(id, 'camara');
+      onRemoveId(id);
+    };
     rustDeskWinManager.setMethodHandler(_remoteMethodHandler);
   }
 
