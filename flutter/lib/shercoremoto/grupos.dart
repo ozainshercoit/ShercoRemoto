@@ -2,7 +2,7 @@
 // thumbnail and tile views and custom names and icons.
 import 'package:flutter/material.dart';
 
-import '../common.dart';
+import '../common.dart' hide Dialog;
 import '../common/formatter/id_formatter.dart';
 import 'api.dart';
 import 'iconos_data.dart';
