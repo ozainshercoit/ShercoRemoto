@@ -350,7 +350,7 @@ jobs:
           # Use the app name for the installed exe and the MSI product name
           cp -r ./rustdesk ./shercoremoto-msi
           pushd ./res/msi
-          python preprocess.py --arp -d ../../shercoremoto-msi --app-name ShercoRemoto
+          python preprocess.py --arp -d ../../shercoremoto-msi --app-name ShercoRemoto --manufacturer Forzinova
           nuget restore msi.sln
           $msiPlatform = if ('${{ matrix.job.arch }}' -eq 'aarch64') { 'ARM64' } else { 'x64' }
           msbuild msi.sln -p:Configuration=Release -p:Platform=$msiPlatform /p:TargetVersion=Windows10

@@ -194,7 +194,7 @@ class ShercoArranque extends StatefulWidget {
       {super.key,
       required this.child,
       required this.tarea,
-      this.minimo = const Duration(milliseconds: 1500),
+      this.minimo = const Duration(milliseconds: 2800),
       this.maximo = const Duration(seconds: 6)});
   @override
   State<ShercoArranque> createState() => _ShercoArranqueState();
