@@ -28,6 +28,7 @@ class _ShercoEquiposPanelState extends State<ShercoEquiposPanel> {
   _Vista _vista = _Vista.lista;
   bool _cargando = false;
   String? _error;
+  bool _estrecho = false; // narrow window: icon-only sidebar
 
   @override
   void initState() {
@@ -97,7 +98,17 @@ class _ShercoEquiposPanelState extends State<ShercoEquiposPanel> {
       child: InkWell(
         borderRadius: BorderRadius.circular(8),
         onTap: onTap,
-        child: Padding(
+        child: _estrecho
+            ? Tooltip(
+                message: total == null ? nombre : '$nombre ($total)',
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Center(
+                      child: ShercoIcono(icono,
+                          size: 20, color: SC.dark(context) && activo ? Colors.white : c)),
+                ),
+              )
+            : Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
           child: Row(children: [
             ShercoIcono(icono, size: 18, color: SC.dark(context) && activo ? Colors.white : c),
@@ -122,7 +133,7 @@ class _ShercoEquiposPanelState extends State<ShercoEquiposPanel> {
   Widget _lateral() {
     final logged = ShercoAuth.instance.loggedIn;
     return Container(
-      width: 220,
+      width: _estrecho ? 64 : 220,
       decoration: BoxDecoration(
           border: Border(right: BorderSide(color: SC.borde(context)))),
       padding: const EdgeInsets.fromLTRB(10, 12, 10, 12),
@@ -132,7 +143,7 @@ class _ShercoEquiposPanelState extends State<ShercoEquiposPanel> {
         Padding(
           padding: const EdgeInsets.fromLTRB(10, 16, 4, 6),
           child: Row(children: [
-            Expanded(
+            if (!_estrecho) Expanded(
                 child: Text('MIS GRUPOS',
                     style: TextStyle(
                         fontSize: 11,
@@ -149,7 +160,14 @@ class _ShercoEquiposPanelState extends State<ShercoEquiposPanel> {
           ]),
         ),
         Expanded(
-          child: !logged
+          child: !logged && _estrecho
+              ? Align(
+                  alignment: Alignment.topCenter,
+                  child: IconButton(
+                      tooltip: 'Iniciar sesión',
+                      icon: const Icon(Icons.login_rounded, color: SC.azul),
+                      onPressed: () => mostrarLoginSherco(context)))
+              : !logged
               ? Padding(
                   padding: const EdgeInsets.all(10),
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -177,7 +195,12 @@ class _ShercoEquiposPanelState extends State<ShercoEquiposPanel> {
                         ),
                     ]),
         ),
-        if (logged) ...[
+        if (logged && _estrecho)
+          IconButton(
+              tooltip: 'Cerrar sesión (${ShercoAuth.instance.user.value?.name ?? ''})',
+              icon: Icon(Icons.logout_rounded, size: 18, color: SC.suave(context)),
+              onPressed: () => ShercoAuth.instance.logout()),
+        if (logged && !_estrecho) ...[
           Divider(color: SC.borde(context)),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -408,6 +431,8 @@ class _ShercoEquiposPanelState extends State<ShercoEquiposPanel> {
       );
 
   Widget _lista(ShercoGrupo g) {
+    return LayoutBuilder(builder: (_, cons) {
+    final apretado = cons.maxWidth < 460;
     return ListView.separated(
       itemCount: g.equipos.length,
       separatorBuilder: (_, __) => const SizedBox(height: 8),
@@ -420,26 +445,45 @@ class _ShercoEquiposPanelState extends State<ShercoEquiposPanel> {
             child: Row(children: [
               _botonIcono(g, e, 38, 19),
               const SizedBox(width: 14),
-              Expanded(
-                  flex: 3,
-                  child: Text(e.nombre,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700))),
-              Expanded(
-                  flex: 2,
-                  child: Text(formatID(e.idRemoto),
-                      style: TextStyle(fontSize: 13, color: SC.suave(context)))),
-              TextButton(
-                  onPressed: () => connect(context, e.idRemoto),
-                  style: TextButton.styleFrom(
-                      backgroundColor: SC.chip(context), foregroundColor: SC.azul),
-                  child: const Text('Conectar', style: TextStyle(fontWeight: FontWeight.w700))),
+              if (apretado)
+                Expanded(
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(e.nombre,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
+                    Text(formatID(e.idRemoto),
+                        style: TextStyle(fontSize: 12, color: SC.suave(context))),
+                  ]),
+                )
+              else ...[
+                Expanded(
+                    flex: 3,
+                    child: Text(e.nombre,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700))),
+                Expanded(
+                    flex: 2,
+                    child: Text(formatID(e.idRemoto),
+                        style: TextStyle(fontSize: 13, color: SC.suave(context)))),
+              ],
+              if (apretado)
+                IconButton(
+                    tooltip: 'Conectar',
+                    onPressed: () => connect(context, e.idRemoto),
+                    icon: const Icon(Icons.play_circle_fill_rounded, color: SC.azul))
+              else
+                TextButton(
+                    onPressed: () => connect(context, e.idRemoto),
+                    style: TextButton.styleFrom(
+                        backgroundColor: SC.chip(context), foregroundColor: SC.azul),
+                    child: const Text('Conectar', style: TextStyle(fontWeight: FontWeight.w700))),
               _menuEquipo(g, e),
             ]),
           ),
         );
       },
     );
+    });
   }
 
   Widget _rejilla(ShercoGrupo g, {required bool mini}) {
@@ -618,10 +662,13 @@ class _ShercoEquiposPanelState extends State<ShercoEquiposPanel> {
     final g = _grupo;
     return ValueListenableBuilder(
       valueListenable: ShercoAuth.instance.user,
-      builder: (_, __, ___) => Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        _lateral(),
-        Expanded(child: g == null ? widget.peerTabs : _contenidoGrupo(g)),
-      ]),
+      builder: (_, __, ___) => LayoutBuilder(builder: (_, cons) {
+        _estrecho = cons.maxWidth < 640;
+        return Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          _lateral(),
+          Expanded(child: g == null ? widget.peerTabs : _contenidoGrupo(g)),
+        ]);
+      }),
     );
   }
 }
