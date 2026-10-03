@@ -910,18 +910,18 @@ class OverlayDialogManager {
 
       // ShercoRemoto: connecting animation
       if (text == 'Connecting...' && isDesktop) {
-        return Center(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(16),
+        return CustomAlertDialog(
+          contentPadding: 0,
+          contentBoxConstraints: const BoxConstraints(maxWidth: 440),
+          onCancel: showCancel ? cancel : null,
+          content: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
             child: SizedBox(
               width: 440,
               height: 400,
-              child: Material(
-                type: MaterialType.transparency,
-                child: ShercoCargando(
-                    texto: 'Iniciando conexión remota…',
-                    onCancel: showCancel ? cancel : null),
-              ),
+              child: ShercoCargando(
+                  texto: 'Iniciando conexión remota…',
+                  onCancel: showCancel ? cancel : null),
             ),
           ),
         );
