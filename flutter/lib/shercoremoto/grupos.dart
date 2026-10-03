@@ -562,25 +562,41 @@ class _ShercoEquiposPanelState extends State<ShercoEquiposPanel> {
                       }
                     }),
               ]),
-              Text('${g.equipos.length} equipos',
+              Text('${g.equipos.length} ${g.equipos.length == 1 ? 'equipo' : 'equipos'}',
                   style: TextStyle(fontSize: 13, color: SC.suave(context))),
             ]),
           ),
-          SegmentedButton<_Vista>(
-            showSelectedIcon: false,
-            segments: [
-              for (final v in vistas)
-                ButtonSegment(value: v.$1, label: Text(v.$2), icon: Icon(v.$3, size: 16)),
-            ],
-            selected: {_vista},
-            onSelectionChanged: (s) => setState(() => _vista = s.first),
-          ),
-          const SizedBox(width: 10),
-          FilledButton(
-              style: FilledButton.styleFrom(backgroundColor: SC.azul),
-              onPressed: () => _anadirEquipo(g),
-              child: const Text('Añadir equipo')),
         ]),
+        const SizedBox(height: 10),
+        // Second row so a narrow window never squeezes the group name
+        LayoutBuilder(builder: (_, cons) {
+          final compacto = cons.maxWidth < 520;
+          return Wrap(
+            spacing: 10,
+            runSpacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              SegmentedButton<_Vista>(
+                showSelectedIcon: false,
+                segments: [
+                  for (final v in vistas)
+                    ButtonSegment(
+                        value: v.$1,
+                        tooltip: v.$2,
+                        label: compacto ? null : Text(v.$2),
+                        icon: Icon(v.$3, size: 16)),
+                ],
+                selected: {_vista},
+                onSelectionChanged: (s) => setState(() => _vista = s.first),
+              ),
+              FilledButton.icon(
+                  style: FilledButton.styleFrom(backgroundColor: SC.azul),
+                  onPressed: () => _anadirEquipo(g),
+                  icon: const Icon(Icons.add, size: 16),
+                  label: const Text('Añadir equipo')),
+            ],
+          );
+        }),
         const SizedBox(height: 14),
         Expanded(
           child: g.equipos.isEmpty
