@@ -1859,7 +1859,40 @@ fn get_uninstall(kill_self: bool, uninstall_printer: bool) -> ResultType<String>
 }
 
 pub fn uninstall_me(kill_self: bool) -> ResultType<()> {
-    run_cmds(get_uninstall(kill_self, true)?, true, "uninstall")
+    let mut cmds = get_uninstall(kill_self, true)?;
+    cmds.push_str(&sherco_remove_settings_cmds());
+    run_cmds(cmds, true, "uninstall")
+}
+
+/// ShercoRemoto: asks whether to also delete settings and configuration;
+/// returns the extra uninstall commands when the answer is yes.
+fn sherco_remove_settings_cmds() -> String {
+    let wide = |s: &str| s.encode_utf16().chain(std::iter::once(0)).collect::<Vec<u16>>();
+    let app_name = crate::get_app_name();
+    let text = wide(&format!(
+        "¿Eliminar también la configuración y los ajustes de {app_name} de este equipo?\n\n\
+         Delete {app_name} settings and configuration from this computer too?"
+    ));
+    let caption = wide(&app_name);
+    let answer = unsafe {
+        MessageBoxW(
+            std::ptr::null_mut(),
+            text.as_ptr(),
+            caption.as_ptr(),
+            MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2 | MB_TOPMOST | MB_SETFOREGROUND,
+        )
+    };
+    if answer != IDYES {
+        return String::new();
+    }
+    let lower = app_name.to_lowercase();
+    format!(
+        "
+    if exist \"%APPDATA%\\{app_name}\" rd /s /q \"%APPDATA%\\{app_name}\"
+    if exist \"%WINDIR%\\ServiceProfiles\\LocalService\\AppData\\Roaming\\{app_name}\" rd /s /q \"%WINDIR%\\ServiceProfiles\\LocalService\\AppData\\Roaming\\{app_name}\"
+    if exist \"%LOCALAPPDATA%\\{lower}\" rd /s /q \"%LOCALAPPDATA%\\{lower}\"
+    "
+    )
 }
 
 fn write_vbs(cmds: String, tip: &str) -> ResultType<PathBuf> {
