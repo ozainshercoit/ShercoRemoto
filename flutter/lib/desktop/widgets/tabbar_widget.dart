@@ -14,6 +14,7 @@ import 'package:flutter_hbb/main.dart';
 import 'package:flutter_hbb/models/platform_model.dart';
 import 'package:flutter_hbb/models/state_model.dart';
 import 'package:get/get.dart';
+import 'package:flutter_hbb/shercoremoto/region.dart';
 import 'package:get/get_rx/src/rx_workers/utils/debouncer.dart';
 import 'package:scroll_pos/scroll_pos.dart';
 import 'package:window_manager/window_manager.dart';
@@ -640,9 +641,11 @@ class _DesktopTabState extends State<DesktopTab>
                         ),
                         Offstage(
                             offstage: !showTitle,
-                            child: const Text(
-                              "ShercoRemoto",
-                              style: TextStyle(fontSize: 13),
+                            child: Text(
+                              shercoEtiquetaRegion().isEmpty
+                                  ? "ShercoRemoto"
+                                  : "ShercoRemoto   ·   ${shercoEtiquetaRegion()}",
+                              style: const TextStyle(fontSize: 13),
                             ).marginOnly(left: 2))
                       ]).marginOnly(
                         left: 5,

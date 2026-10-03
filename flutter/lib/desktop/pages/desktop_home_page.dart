@@ -25,6 +25,8 @@ import 'package:window_manager/window_manager.dart';
 import 'package:window_size/window_size.dart' as window_size;
 import '../widgets/button.dart';
 import '../../shercoremoto/api.dart';
+import '../../shercoremoto/compartir.dart';
+import '../../shercoremoto/region.dart';
 
 class DesktopHomePage extends StatefulWidget {
   const DesktopHomePage({Key? key}) : super(key: key);
@@ -221,7 +223,21 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                                   ?.color
                                   ?.withOpacity(0.5)),
                         ).marginOnly(top: 5),
-                        buildPopupMenu(context)
+                        Row(mainAxisSize: MainAxisSize.min, children: [
+                          // ShercoRemoto: share name + ID
+                          IconButton(
+                            tooltip: shercoIngles() ? 'Share' : 'Compartir',
+                            iconSize: 16,
+                            visualDensity: VisualDensity.compact,
+                            padding: EdgeInsets.zero,
+                            icon: const Icon(Icons.share_rounded,
+                                color: MyTheme.accent),
+                            onPressed: () => mostrarCompartir(context,
+                                model.serverId.text, Platform.localHostname,
+                                ingles: shercoIngles()),
+                          ),
+                          buildPopupMenu(context),
+                        ])
                       ],
                     ),
                   ),

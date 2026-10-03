@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import '../common.dart' hide Dialog;
 import '../common/formatter/id_formatter.dart';
 import 'api.dart';
+import 'compartir.dart';
+import 'region.dart';
 import 'iconos_data.dart';
 import 'login.dart';
 import 'widgets.dart';
@@ -347,6 +349,8 @@ class _ShercoEquiposPanelState extends State<ShercoEquiposPanel> {
         switch (v) {
           case 'archivos':
             connect(context, e.idRemoto, isFileTransfer: true);
+          case 'compartir':
+            await mostrarCompartir(context, e.idRemoto, e.nombre, ingles: shercoIngles());
           case 'renombrar':
             final n = await _pedirTexto('Renombrar equipo', 'Nombre', inicial: e.nombre);
             if (n != null && n.isNotEmpty) {
@@ -365,6 +369,7 @@ class _ShercoEquiposPanelState extends State<ShercoEquiposPanel> {
       },
       itemBuilder: (_) => const [
         PopupMenuItem(value: 'archivos', child: Text('Transferir archivos')),
+        PopupMenuItem(value: 'compartir', child: Text('Compartir')),
         PopupMenuItem(value: 'renombrar', child: Text('Renombrar')),
         PopupMenuItem(value: 'icono', child: Text('Cambiar icono')),
         PopupMenuItem(value: 'mover', child: Text('Mover a otro grupo')),

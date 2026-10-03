@@ -1,0 +1,25 @@
+ACUERDO DE LICENCIA DE USUARIO FINAL DE SHERCOREMOTO — EUROPA
+(Borrador pendiente de revisión jurídica)
+
+Titular del software: Ozain Giannelli.
+Editor y soporte técnico: Forzinova, RIF J-410354852, Urb. Los Castores, Parcela 14A, San Antonio de los Altos, Miranda, Venezuela, C.P. 1204. Contacto: soporte@forzinova.com · www.forzinova.com
+
+1. OBJETO. Este acuerdo regula el uso de ShercoRemoto, una aplicación de escritorio remoto. Al instalar o usar el software acepta este acuerdo. Si no lo acepta, no instale ni use el software.
+
+2. LICENCIA. Se le concede una licencia gratuita, no exclusiva, intransferible y revocable para instalar y usar el software. Puede usarlo para recibir asistencia técnica y, si dispone de una cuenta autorizada de ShercoIT, para conectarse a otros equipos.
+
+3. SOFTWARE LIBRE. ShercoRemoto se basa en componentes publicados bajo la licencia GNU Affero General Public License v3 (AGPL-3.0). Esos componentes se rigen por su propia licencia, que le permite obtener, estudiar y modificar su código fuente en https://github.com/ozainshercoit/ShercoRemoto. Nada de este acuerdo limita los derechos que le concede la AGPL-3.0.
+
+4. USO PERMITIDO. Solo puede conectarse a equipos para los que tenga autorización de su propietario o usuario. Queda prohibido usar el software para acceder sin permiso a equipos ajenos, para fines ilícitos o para vulnerar la intimidad de terceros.
+
+5. PROTECCIÓN DE DATOS (RGPD). El tratamiento de datos personales se rige por el Reglamento (UE) 2016/679 y la Ley Orgánica 3/2018. Se tratan los datos necesarios para prestar el servicio: identificador del equipo, dirección IP, registros de conexión y, si inicia sesión, sus datos de cuenta. Los servidores se encuentran en España. El soporte técnico se presta desde Venezuela con las garantías de los artículos 44 a 46 del RGPD (cláusulas contractuales tipo). Puede ejercer sus derechos de acceso, rectificación, supresión, oposición, limitación y portabilidad en soporte@forzinova.com, y reclamar ante la Agencia Española de Protección de Datos (www.aepd.es) o la autoridad de su país.
+
+6. SIN GARANTÍAS. El software se facilita gratuitamente y «tal cual». En la medida permitida por la ley, no se garantiza que funcione sin interrupciones ni errores.
+
+7. RESPONSABILIDAD. En la medida permitida por la ley, ni el titular ni el editor responden de daños indirectos, lucro cesante o pérdida de datos. Esta limitación no se aplica en casos de dolo o culpa grave ni excluye los derechos que la normativa de consumidores de la Unión Europea le reconoce si usted actúa como consumidor.
+
+8. DURACIÓN. Puede dejar de usar el software y desinstalarlo en cualquier momento. La licencia puede revocarse si se incumple este acuerdo.
+
+9. LEY APLICABLE. Este acuerdo se rige por la legislación española. Si usted es consumidor, conserva la protección de las normas imperativas de su país de residencia en la Unión Europea y puede acudir a los tribunales de su domicilio.
+
+10. CONTACTO. soporte@forzinova.com

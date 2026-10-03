@@ -1,0 +1,25 @@
+ACUERDO DE LICENCIA DE USUARIO FINAL DE SHERCOREMOTO — AMÉRICAS
+(Borrador pendiente de revisión jurídica)
+
+Titular del software: Ozain Giannelli.
+Editor y soporte técnico: Forzinova, RIF J-410354852, Urb. Los Castores, Parcela 14A, San Antonio de los Altos, Miranda, Venezuela, C.P. 1204. Contacto: soporte@forzinova.com · www.forzinova.com
+
+1. OBJETO. Este acuerdo regula el uso de ShercoRemoto, una aplicación de escritorio remoto. Al instalar o usar el software acepta este acuerdo. Si no lo acepta, no instale ni use el software.
+
+2. LICENCIA. Se le concede una licencia gratuita, no exclusiva, intransferible y revocable para instalar y usar el software. Puede usarlo para recibir asistencia técnica y, si dispone de una cuenta autorizada de ShercoIT, para conectarse a otros equipos.
+
+3. SOFTWARE LIBRE. ShercoRemoto se basa en componentes publicados bajo la licencia GNU Affero General Public License v3 (AGPL-3.0), que le permite obtener, estudiar y modificar su código fuente en https://github.com/ozainshercoit/ShercoRemoto. Nada de este acuerdo limita los derechos que le concede la AGPL-3.0.
+
+4. USO PERMITIDO. Solo puede conectarse a equipos para los que tenga autorización de su propietario o usuario. Queda prohibido usar el software para acceder sin permiso a equipos ajenos o con fines ilícitos.
+
+5. PRIVACIDAD. Se tratan los datos necesarios para prestar el servicio: identificador del equipo, dirección IP, registros de conexión y, si inicia sesión, sus datos de cuenta. Los servidores se encuentran en España y el soporte técnico se presta desde Venezuela. Los datos se tratan conforme a la normativa de protección de datos aplicable en su país. Puede solicitar acceso, corrección o eliminación de sus datos en soporte@forzinova.com.
+
+6. SIN GARANTÍAS. El software se facilita gratuitamente y «tal cual», sin garantías de ningún tipo, expresas o implícitas, en la máxima medida permitida por la ley aplicable.
+
+7. LIMITACIÓN DE RESPONSABILIDAD. En la máxima medida permitida por la ley, ni el titular ni el editor responden de daños indirectos, incidentales o consecuentes, lucro cesante o pérdida de datos derivados del uso del software. Esta limitación no se aplica en los casos que la ley de su país no permita limitar.
+
+8. DURACIÓN. Puede dejar de usar el software y desinstalarlo en cualquier momento. La licencia puede revocarse si se incumple este acuerdo.
+
+9. LEY APLICABLE. Este acuerdo se rige por la legislación de la República Bolivariana de Venezuela, sin perjuicio de las normas imperativas de protección al consumidor de su país de residencia.
+
+10. CONTACTO. soporte@forzinova.com

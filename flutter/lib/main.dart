@@ -31,6 +31,7 @@ import 'mobile/widgets/deploy_dialog.dart';
 import 'models/platform_model.dart';
 import 'shercoremoto/api.dart';
 import 'shercoremoto/widgets.dart';
+import 'shercoremoto/region.dart';
 
 /// Basic window and launch properties.
 int? kWindowId;
@@ -506,6 +507,11 @@ class _AppState extends State<App> with WidgetsBindingObserver {
           home: isDesktop
               ? ShercoArranque(
                   tarea: ShercoAuth.instance.init,
+                  necesitaAsistente: shercoNecesitaConfigurar,
+                  asistente: (listo) => ShercoPrimerArranque(onListo: () {
+                    listo();
+                    reloadAllWindows();
+                  }),
                   child: const DesktopTabPage())
               : isWeb
                   ? WebHomePage()

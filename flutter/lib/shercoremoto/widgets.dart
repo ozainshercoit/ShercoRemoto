@@ -190,10 +190,16 @@ class ShercoArranque extends StatefulWidget {
   final Widget child;
   final Future<void> Function() tarea;
   final Duration minimo, maximo;
+
+  /// Optional first-run step shown after loading while [necesitaAsistente] is true.
+  final bool Function()? necesitaAsistente;
+  final Widget Function(VoidCallback listo)? asistente;
   const ShercoArranque(
       {super.key,
       required this.child,
       required this.tarea,
+      this.necesitaAsistente,
+      this.asistente,
       this.minimo = const Duration(seconds: 5),
       this.maximo = const Duration(seconds: 8)});
   @override
@@ -202,6 +208,7 @@ class ShercoArranque extends StatefulWidget {
 
 class _ShercoArranqueState extends State<ShercoArranque> {
   bool _listo = false;
+  bool _asistenteHecho = false;
 
   @override
   void initState() {
@@ -219,7 +226,14 @@ class _ShercoArranqueState extends State<ShercoArranque> {
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 350),
       child: _listo
-          ? widget.child
+          ? (!_asistenteHecho &&
+                  widget.asistente != null &&
+                  (widget.necesitaAsistente?.call() ?? false)
+              ? KeyedSubtree(
+                  key: const ValueKey('asistente'),
+                  child: widget.asistente!(
+                      () => setState(() => _asistenteHecho = true)))
+              : widget.child)
           : const ShercoCargando(
               key: ValueKey('arranque'),
               texto: 'Conectando con el servidor de ShercoIT…'),
