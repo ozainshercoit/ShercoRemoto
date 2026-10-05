@@ -6,6 +6,10 @@ on:
   workflow_dispatch:
   push:
     branches: [master]
+    paths-ignore:
+      - "flutter/android/**"
+      - "flutter/lib/shercoremoto/permisos_android.dart"
+      - ".github/workflows/shercoremoto-android.yml"
 
 permissions:
   contents: write

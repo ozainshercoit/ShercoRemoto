@@ -30,6 +30,7 @@ import 'mobile/pages/server_page.dart';
 import 'mobile/widgets/deploy_dialog.dart';
 import 'models/platform_model.dart';
 import 'shercoremoto/api.dart';
+import 'shercoremoto/permisos_android.dart';
 import 'shercoremoto/widgets.dart';
 import 'shercoremoto/region.dart';
 
@@ -515,7 +516,16 @@ class _AppState extends State<App> with WidgetsBindingObserver {
                   child: const DesktopTabPage())
               : isWeb
                   ? WebHomePage()
-                  : HomePage(),
+                  : isAndroid
+                      ? ShercoArranque(
+                          tarea: ShercoAuth.instance.init,
+                          necesitaAsistente: () =>
+                              shercoNecesitaConfigurar() ||
+                              shercoPermisosAndroidPendiente(),
+                          asistente: (listo) =>
+                              ShercoAsistenteAndroid(onListo: listo),
+                          child: HomePage())
+                      : HomePage(),
           localizationsDelegates: const [
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
