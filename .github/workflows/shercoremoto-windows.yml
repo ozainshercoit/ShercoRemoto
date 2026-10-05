@@ -10,6 +10,11 @@ on:
       - "flutter/android/**"
       - "flutter/lib/shercoremoto/permisos_android.dart"
       - ".github/workflows/shercoremoto-android.yml"
+      - "flutter/linux/**"
+      - "res/DEBIAN/**"
+      - "res/shercoremoto.*"
+      - "res/shercoremoto-link.desktop"
+      - ".github/workflows/shercoremoto-linux.yml"
 
 permissions:
   contents: write

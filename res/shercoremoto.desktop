@@ -1,0 +1,20 @@
+[Desktop Entry]
+Name=ShercoRemoto
+GenericName=Remote Desktop
+GenericName[es]=Escritorio remoto
+Comment=ShercoRemoto remote desktop
+Comment[es]=Escritorio remoto ShercoRemoto
+Exec=shercoremoto %u
+Icon=shercoremoto
+Terminal=false
+Type=Application
+StartupNotify=true
+Categories=Network;RemoteAccess;GTK;
+Keywords=remote;desktop;support;shercoit;shercoremoto;
+Actions=new-window;
+StartupWMClass=shercoremoto
+
+[Desktop Action new-window]
+Name=Open a New Window
+Name[es]=Abrir una ventana nueva
+Exec=shercoremoto %u

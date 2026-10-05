@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=ShercoRemoto
+NoDisplay=true
+MimeType=x-scheme-handler/shercoremoto;
+TryExec=shercoremoto
+Exec=shercoremoto %u
+Icon=shercoremoto
+Terminal=false
+Type=Application
+StartupNotify=false
+StartupWMClass=shercoremoto

@@ -7,7 +7,9 @@ on:
   push:
     branches: [master]
     paths:
-      - "flutter/**"
+      - "flutter/lib/**"
+      - "flutter/android/**"
+      - "flutter/pubspec.*"
       - "src/**"
       - "libs/**"
       - "Cargo.*"
