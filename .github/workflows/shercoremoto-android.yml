@@ -95,18 +95,6 @@ jobs:
           vcpkgGitCommitId: ${{ env.VCPKG_COMMIT_ID }}
           doNotCache: false
 
-      - name: Install vcpkg dependencies
-        shell: bash
-        run: |
-          for abi in arm64-v8a armeabi-v7a; do
-            if ! ./flutter/build_android_deps.sh "$abi"; then
-              find "${VCPKG_ROOT}/" -name "*.log" | while read -r _1; do
-                echo "$_1:"; cat "$_1"; echo
-              done
-              exit 1
-            fi
-          done
-
       - name: Restore bridge files
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
@@ -125,14 +113,23 @@ jobs:
           key: arm64-armv7
 
       - name: Build rustdesk lib
+        shell: bash
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
           ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
         run: |
           rustup target add aarch64-linux-android armv7-linux-androideabi
           cargo install cargo-ndk --version ${{ env.CARGO_NDK_VERSION }} --locked
-          ./flutter/ndk_arm64.sh
-          ./flutter/ndk_arm.sh
+          # vcpkg manifest installs replace the previous triplet, so build each ABI right after its deps
+          for abi in arm64-v8a armeabi-v7a; do
+            if ! ./flutter/build_android_deps.sh "$abi"; then
+              find "${VCPKG_ROOT}/" -name "*.log" | while read -r _1; do
+                echo "$_1:"; cat "$_1"; echo
+              done
+              exit 1
+            fi
+            if [ "$abi" = arm64-v8a ]; then ./flutter/ndk_arm64.sh; else ./flutter/ndk_arm.sh; fi
+          done
 
       - name: Build ShercoRemoto apk
         shell: bash
