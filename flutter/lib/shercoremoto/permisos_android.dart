@@ -173,12 +173,10 @@ class _ShercoPermisosAndroidState extends State<ShercoPermisosAndroid>
         builder: (c) => AlertDialog(
               title: Text(t('Activar el control remoto', 'Turn on remote control')),
               content: Text(t(
-                  'Se abrirá Accesibilidad. Busca «ShercoRemoto Control» (a veces dentro de «Aplicaciones instaladas» o «Servicios descargados»), actívalo y vuelve a ShercoRemoto.
-
-Si Android dice «Ajuste restringido», abre la información de la app ShercoRemoto, toca el menú ⋮ y elige «Permitir ajustes restringidos»; después vuelve a intentarlo.',
-                  'Accessibility will open. Find "ShercoRemoto Control" (sometimes under "Installed apps" or "Downloaded services"), turn it on and come back to ShercoRemoto.
-
-If Android says "Restricted setting", open the ShercoRemoto app info, tap the ⋮ menu and choose "Allow restricted settings", then try again.')),
+                  'Se abrirá Accesibilidad. Busca «ShercoRemoto Control» (a veces dentro de «Aplicaciones instaladas» o «Servicios descargados»), actívalo y vuelve a ShercoRemoto.\n\n'
+                      'Si Android dice «Ajuste restringido», abre la información de la app ShercoRemoto, toca el menú ⋮ y elige «Permitir ajustes restringidos»; después vuelve a intentarlo.',
+                  'Accessibility will open. Find "ShercoRemoto Control" (sometimes under "Installed apps" or "Downloaded services"), turn it on and come back to ShercoRemoto.\n\n'
+                      'If Android says "Restricted setting", open the ShercoRemoto app info, tap the ⋮ menu and choose "Allow restricted settings", then try again.')),
               actions: [
                 TextButton(
                     onPressed: () => Navigator.pop(c, false),
