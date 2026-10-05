@@ -1,0 +1,133 @@
+# ShercoRemoto: iPhone / iPad build (controller only; iOS cannot be controlled remotely).
+# Based on build-rustdesk-ios in the upstream flutter-build.yml. Produces an UNSIGNED
+# .ipa until the Apple Developer account exists; signing for TestFlight comes then.
+name: Build ShercoRemoto for iOS
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - "flutter/lib/**"
+      - "flutter/ios/**"
+      - "flutter/pubspec.*"
+      - "src/**"
+      - "libs/**"
+      - "Cargo.*"
+      - ".github/workflows/shercoremoto-ios.yml"
+
+permissions:
+  contents: write
+
+env:
+  RUST_VERSION: "1.75"
+  FLUTTER_VERSION: "3.24.5"
+  TAG_NAME: "shercoremoto-ios"
+  VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
+  VCPKG_COMMIT_ID: "9e593bb18ea69cc5095e012465dcd675a822ed0d"
+  VERSION: "1.5.0"
+
+jobs:
+  generate-bridge:
+    uses: ./.github/workflows/bridge.yml
+
+  build-ios:
+    needs: [generate-bridge]
+    name: build ShercoRemoto ios
+    runs-on: macos-latest
+    steps:
+      - name: Export GitHub Actions cache environment variables
+        uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410 # v6
+        with:
+          script: |
+            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+
+      - name: Install dependencies
+        run: |
+          brew install nasm yasm
+
+      - name: Checkout source code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          submodules: recursive
+
+      - name: Install flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          channel: "stable"
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+
+      - name: Patch flutter
+        run: |
+          cd $(dirname $(dirname $(which flutter)))
+          git apply ${{ github.workspace }}/.github/patches/flutter_3.24.4_dropdown_menu_enableFilter.diff
+
+      - name: Setup vcpkg with Github Actions binary cache
+        uses: lukka/run-vcpkg@b1a0dd252f06b9e25b3c022a9a03bd7a427fb6a2 # v11
+        with:
+          vcpkgGitCommitId: ${{ env.VCPKG_COMMIT_ID }}
+          doNotCache: false
+
+      - name: Install vcpkg dependencies
+        shell: bash
+        run: |
+          if ! $VCPKG_ROOT/vcpkg install --triplet arm64-ios --x-install-root="$VCPKG_ROOT/installed"; then
+            find "${VCPKG_ROOT}/" -name "*.log" | while read -r _1; do
+              echo "$_1:"; cat "$_1"; echo
+            done
+            exit 1
+          fi
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9 # v1
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+          targets: aarch64-apple-ios
+          components: "rustfmt"
+
+      - uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
+        with:
+          prefix-key: shercoremoto-ios
+          key: aarch64-apple-ios
+
+      - name: Restore bridge files
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: bridge-artifact
+          path: ./
+
+      - name: Build rustdesk lib
+        run: |
+          rustup target add aarch64-apple-ios
+          cargo build --locked --features flutter,hwcodec --release --target aarch64-apple-ios --lib
+
+      - name: Build ShercoRemoto (unsigned)
+        shell: bash
+        run: |
+          # App Store rejects icons with an alpha channel
+          for f in flutter/ios/Runner/Assets.xcassets/AppIcon.appiconset/*.png; do
+            sips -s format jpeg "$f" --out /tmp/i.jpg >/dev/null && sips -s format png /tmp/i.jpg --out "$f" >/dev/null
+          done
+          pushd flutter
+          flutter build ios --release --no-codesign
+          popd
+          mkdir -p out/Payload
+          cp -R flutter/build/ios/iphoneos/Runner.app out/Payload/
+          pushd out
+          zip -qry shercoremoto-${{ env.VERSION }}-ios-unsigned.ipa Payload
+          popd
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: shercoremoto-${{ env.VERSION }}-ios-unsigned.ipa
+          path: out/shercoremoto-${{ env.VERSION }}-ios-unsigned.ipa
+
+      - name: Publish unsigned ipa
+        uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
+        with:
+          prerelease: true
+          tag_name: ${{ env.TAG_NAME }}
+          files: |
+            out/shercoremoto-${{ env.VERSION }}-ios-unsigned.ipa
