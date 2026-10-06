@@ -7,6 +7,7 @@ import '../common/formatter/id_formatter.dart';
 import 'api.dart';
 import 'compartir.dart';
 import 'region.dart';
+import 'servidor.dart';
 import 'iconos_data.dart';
 import 'login.dart';
 import 'widgets.dart';
@@ -312,9 +313,10 @@ class _ShercoEquiposPanelState extends State<ShercoEquiposPanel> {
   Future<void> _anadirEquipo(ShercoGrupo g) async {
     final idC = TextEditingController();
     final nomC = TextEditingController();
+    var publico = false;
     final ok = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
+      builder: (ctx) => StatefulBuilder(builder: (ctx, setD) => AlertDialog(
         title: Text('Añadir equipo a ${g.nombre}'),
         content: Column(mainAxisSize: MainAxisSize.min, children: [
           TextField(
@@ -324,6 +326,15 @@ class _ShercoEquiposPanelState extends State<ShercoEquiposPanel> {
               decoration: const InputDecoration(labelText: 'ID del equipo')),
           const SizedBox(height: 10),
           TextField(controller: nomC, decoration: const InputDecoration(labelText: 'Nombre')),
+          const SizedBox(height: 10),
+          DropdownButtonFormField<bool>(
+              value: publico,
+              decoration: const InputDecoration(labelText: 'Servidor del equipo'),
+              items: const [
+                DropdownMenuItem(value: false, child: Text('ShercoRemoto')),
+                DropdownMenuItem(value: true, child: Text('RustDesk público')),
+              ],
+              onChanged: (v) => setD(() => publico = v ?? false)),
         ]),
         actions: [
           TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancelar')),
@@ -332,12 +343,12 @@ class _ShercoEquiposPanelState extends State<ShercoEquiposPanel> {
               onPressed: () => Navigator.of(ctx).pop(true),
               child: const Text('Añadir')),
         ],
-      ),
+      )),
     );
     if (ok != true || idC.text.trim().isEmpty) return;
     final nombre = nomC.text.trim().isEmpty ? idC.text.trim() : nomC.text.trim();
     final icono = await _elegirIcono(nombre, 'Monitor') ?? 'Monitor';
-    await _accion(() => ShercoAuth.instance.crearEquipo(g.id, idC.text, nombre, icono));
+    await _accion(() => ShercoAuth.instance.crearEquipo(g.id, idC.text, nombre, icono, publico: publico));
   }
 
   Future<void> _mover(ShercoGrupo g, ShercoEquipo e) async {
@@ -364,6 +375,30 @@ class _ShercoEquiposPanelState extends State<ShercoEquiposPanel> {
 
   // ---------------- Computers ----------------
 
+  static const _naranja = Color(0xFFE08A16);
+
+  Color _colorEquipo(ShercoEquipo e) => e.publico ? _naranja : SC.azul;
+
+  String _idTexto(ShercoEquipo e) =>
+      e.publico ? '${formatID(e.idRemoto)} · RustDesk' : formatID(e.idRemoto);
+
+  /// Connects, first switching to the server the computer lives on.
+  Future<void> _conectar(ShercoEquipo e, {bool archivos = false}) async {
+    final modo = e.publico ? 'publico' : 'sherco';
+    if (shercoModoServidor.value != modo) {
+      await shercoCambiarServidor(modo);
+      if (!mounted) return;
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(
+          content: Text(e.publico
+              ? 'Cambiado al servidor público de RustDesk para conectar con ${e.nombre}.'
+              : 'Cambiado al servidor de ShercoRemoto para conectar con ${e.nombre}.'),
+          duration: const Duration(seconds: 3)));
+      await Future.delayed(const Duration(seconds: 2));
+      if (!mounted) return;
+    }
+    connect(context, e.idRemoto, isFileTransfer: archivos);
+  }
+
   Widget _menuEquipo(ShercoGrupo g, ShercoEquipo e) {
     return PopupMenuButton<String>(
       tooltip: 'Más opciones',
@@ -371,7 +406,7 @@ class _ShercoEquiposPanelState extends State<ShercoEquiposPanel> {
       onSelected: (v) async {
         switch (v) {
           case 'archivos':
-            connect(context, e.idRemoto, isFileTransfer: true);
+            _conectar(e, archivos: true);
           case 'compartir':
             await mostrarCompartir(context, e.idRemoto, e.nombre, ingles: shercoIngles());
           case 'renombrar':
@@ -381,7 +416,10 @@ class _ShercoEquiposPanelState extends State<ShercoEquiposPanel> {
             }
           case 'icono':
             final i = await _elegirIcono(e.nombre, e.icono);
-            if (i != null) await _accion(() => ShercoAuth.instance.editarEquipo(g.id, e.id, icono: i));
+            if (i != null) await _accion(() => ShercoAuth.instance.editarEquipo(g.id, e.id, icono: i, publico: e.publico));
+          case 'servidor':
+            await _accion(() => ShercoAuth.instance
+                .editarEquipo(g.id, e.id, icono: e.icono, publico: !e.publico));
           case 'mover':
             await _mover(g, e);
           case 'borrar':
@@ -390,13 +428,18 @@ class _ShercoEquiposPanelState extends State<ShercoEquiposPanel> {
             }
         }
       },
-      itemBuilder: (_) => const [
-        PopupMenuItem(value: 'archivos', child: Text('Transferir archivos')),
-        PopupMenuItem(value: 'compartir', child: Text('Compartir')),
-        PopupMenuItem(value: 'renombrar', child: Text('Renombrar')),
-        PopupMenuItem(value: 'icono', child: Text('Cambiar icono')),
-        PopupMenuItem(value: 'mover', child: Text('Mover a otro grupo')),
-        PopupMenuItem(value: 'borrar', child: Text('Quitar del grupo')),
+      itemBuilder: (_) => [
+        const PopupMenuItem(value: 'archivos', child: Text('Transferir archivos')),
+        const PopupMenuItem(value: 'compartir', child: Text('Compartir')),
+        const PopupMenuItem(value: 'renombrar', child: Text('Renombrar')),
+        const PopupMenuItem(value: 'icono', child: Text('Cambiar icono')),
+        PopupMenuItem(
+            value: 'servidor',
+            child: Text(e.publico
+                ? 'Pasar a servidor ShercoRemoto'
+                : 'Pasar a servidor RustDesk público')),
+        const PopupMenuItem(value: 'mover', child: Text('Mover a otro grupo')),
+        const PopupMenuItem(value: 'borrar', child: Text('Quitar del grupo')),
       ],
     );
   }
@@ -411,12 +454,12 @@ class _ShercoEquiposPanelState extends State<ShercoEquiposPanel> {
           borderRadius: BorderRadius.circular(caja / 4),
           onTap: () async {
             final i = await _elegirIcono(e.nombre, e.icono);
-            if (i != null) await _accion(() => ShercoAuth.instance.editarEquipo(g.id, e.id, icono: i));
+            if (i != null) await _accion(() => ShercoAuth.instance.editarEquipo(g.id, e.id, icono: i, publico: e.publico));
           },
           child: SizedBox(
               width: caja,
               height: caja,
-              child: Center(child: ShercoIcono(e.icono, size: icono, color: SC.azul))),
+              child: Center(child: ShercoIcono(e.icono, size: icono, color: _colorEquipo(e)))),
         ),
       ),
     );
@@ -439,7 +482,7 @@ class _ShercoEquiposPanelState extends State<ShercoEquiposPanel> {
       itemBuilder: (_, i) {
         final e = g.equipos[i];
         return _tarjeta(
-          onDoubleTap: () => connect(context, e.idRemoto),
+          onDoubleTap: () => _conectar(e),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             child: Row(children: [
@@ -451,7 +494,7 @@ class _ShercoEquiposPanelState extends State<ShercoEquiposPanel> {
                     Text(e.nombre,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
-                    Text(formatID(e.idRemoto),
+                    Text(_idTexto(e),
                         style: TextStyle(fontSize: 12, color: SC.suave(context))),
                   ]),
                 )
@@ -463,17 +506,17 @@ class _ShercoEquiposPanelState extends State<ShercoEquiposPanel> {
                         style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700))),
                 Expanded(
                     flex: 2,
-                    child: Text(formatID(e.idRemoto),
+                    child: Text(_idTexto(e),
                         style: TextStyle(fontSize: 13, color: SC.suave(context)))),
               ],
               if (apretado)
                 IconButton(
                     tooltip: 'Conectar',
-                    onPressed: () => connect(context, e.idRemoto),
+                    onPressed: () => _conectar(e),
                     icon: const Icon(Icons.play_circle_fill_rounded, color: SC.azul))
               else
                 TextButton(
-                    onPressed: () => connect(context, e.idRemoto),
+                    onPressed: () => _conectar(e),
                     style: TextButton.styleFrom(
                         backgroundColor: SC.chip(context), foregroundColor: SC.azul),
                     child: const Text('Conectar', style: TextStyle(fontWeight: FontWeight.w700))),
@@ -501,12 +544,12 @@ class _ShercoEquiposPanelState extends State<ShercoEquiposPanel> {
           final e = g.equipos[i];
           if (mini) {
             return _tarjeta(
-              onDoubleTap: () => connect(context, e.idRemoto),
+              onDoubleTap: () => _conectar(e),
               child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
                 Expanded(
                   child: Container(
                     color: SC.chip(context),
-                    child: Center(child: ShercoIcono(e.icono, size: 44, color: SC.azul, grosor: 1.4)),
+                    child: Center(child: ShercoIcono(e.icono, size: 44, color: _colorEquipo(e), grosor: 1.4)),
                   ),
                 ),
                 Padding(
@@ -517,7 +560,7 @@ class _ShercoEquiposPanelState extends State<ShercoEquiposPanel> {
                         Text(e.nombre,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
-                        Text(formatID(e.idRemoto),
+                        Text(_idTexto(e),
                             style: TextStyle(fontSize: 12, color: SC.suave(context))),
                       ]),
                     ),
@@ -528,7 +571,7 @@ class _ShercoEquiposPanelState extends State<ShercoEquiposPanel> {
             );
           }
           return _tarjeta(
-            onDoubleTap: () => connect(context, e.idRemoto),
+            onDoubleTap: () => _conectar(e),
             child: Stack(children: [
               Positioned(right: 0, top: 0, child: _menuEquipo(g, e)),
               Center(
@@ -542,7 +585,7 @@ class _ShercoEquiposPanelState extends State<ShercoEquiposPanel> {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
-                    Text(formatID(e.idRemoto),
+                    Text(_idTexto(e),
                         style: TextStyle(fontSize: 11, color: SC.suave(context))),
                   ]),
                 ),

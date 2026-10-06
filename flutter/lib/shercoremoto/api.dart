@@ -36,15 +36,28 @@ class ShercoDeviceCode {
       this.intervalo, this.expiraEn);
 }
 
+/// Suffix added to a computer's `icono` when its ID lives on the public
+/// RustDesk server (the ShercoIT API has no field for it).
+const kShercoSufijoPublico = '.rd';
+
 class ShercoEquipo {
   final String id, grupoId, idRemoto, nombre, icono;
   final int orden;
+
+  /// True when the ID belongs to the public RustDesk network, not ShercoRemoto.
+  final bool publico;
   ShercoEquipo(this.id, this.grupoId, this.idRemoto, this.nombre, this.icono,
-      this.orden);
-  factory ShercoEquipo.fromJson(Map<String, dynamic> j, String grupoId) =>
-      ShercoEquipo('${j['id']}', '${j['grupoId'] ?? grupoId}',
-          '${j['idRemoto'] ?? ''}', '${j['nombre'] ?? ''}',
-          '${j['icono'] ?? 'Monitor'}', (j['orden'] as num?)?.toInt() ?? 0);
+      this.orden,
+      {this.publico = false});
+  factory ShercoEquipo.fromJson(Map<String, dynamic> j, String grupoId) {
+    var icono = '${j['icono'] ?? 'Monitor'}';
+    final publico = icono.endsWith(kShercoSufijoPublico);
+    if (publico) icono = icono.substring(0, icono.length - kShercoSufijoPublico.length);
+    return ShercoEquipo('${j['id']}', '${j['grupoId'] ?? grupoId}',
+        '${j['idRemoto'] ?? ''}', '${j['nombre'] ?? ''}', icono,
+        (j['orden'] as num?)?.toInt() ?? 0,
+        publico: publico);
+  }
 }
 
 class ShercoGrupo {
@@ -295,21 +308,28 @@ class ShercoAuth {
       _send('DELETE', '/grupos/$id', auth: true);
 
   Future<void> crearEquipo(String grupoId, String idRemoto, String nombre,
-          String icono) =>
+          String icono,
+          {bool publico = false}) =>
       _send('POST', '/grupos/$grupoId/equipos',
           body: {
             'idRemoto': idRemoto.replaceAll(' ', ''),
             'nombre': nombre,
-            'icono': icono
+            'icono': publico ? '$icono$kShercoSufijoPublico' : icono
           },
           auth: true);
 
+  /// [icono] and [publico] go together: changing either one rewrites the icon field.
   Future<void> editarEquipo(String grupoId, String equipoId,
-          {String? nombre, String? icono, String? idRemoto, String? moverA}) =>
+          {String? nombre,
+          String? icono,
+          bool publico = false,
+          String? idRemoto,
+          String? moverA}) =>
       _send('PATCH', '/grupos/$grupoId/equipos/$equipoId',
           body: {
             if (nombre != null) 'nombre': nombre,
-            if (icono != null) 'icono': icono,
+            if (icono != null)
+              'icono': publico ? '$icono$kShercoSufijoPublico' : icono,
             if (idRemoto != null) 'idRemoto': idRemoto.replaceAll(' ', ''),
             if (moverA != null) 'grupoId': moverA,
           },
