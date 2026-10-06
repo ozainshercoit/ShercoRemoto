@@ -27,6 +27,7 @@ import '../widgets/button.dart';
 import '../../shercoremoto/api.dart';
 import '../../shercoremoto/compartir.dart';
 import '../../shercoremoto/region.dart';
+import '../../shercoremoto/servidor.dart';
 
 class DesktopHomePage extends StatefulWidget {
   const DesktopHomePage({Key? key}) : super(key: key);
@@ -93,6 +94,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
         child: loadLogo(),
       ),
       buildTip(context),
+      const ShercoSelectorServidor(compacto: true),
       if (!isOutgoingOnly) buildIDBoard(context),
       if (!isOutgoingOnly) buildPasswordBoard(context),
       FutureBuilder<Widget>(

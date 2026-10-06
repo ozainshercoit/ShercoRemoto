@@ -19,6 +19,7 @@ import '../../models/model.dart';
 import '../../models/platform_model.dart';
 import '../widgets/deploy_dialog.dart';
 import '../widgets/dialog.dart';
+import '../../shercoremoto/servidor.dart';
 import 'home_page.dart';
 import 'scan_page.dart';
 
@@ -748,6 +749,9 @@ class _SettingsState extends State<SettingsPage> with WidgetsBindingObserver {
             ],
           ),
         SettingsSection(title: Text(translate("Settings")), tiles: [
+          SettingsTile(
+              title: const ShercoSelectorServidor(compacto: true),
+              leading: const Icon(Icons.swap_horiz)),
           if (!disabledSettings && !_hideNetwork && !_hideServer)
             SettingsTile(
                 title: Text(translate('ID/Relay Server')),

@@ -16,6 +16,7 @@ import '../../common/widgets/autocomplete.dart';
 import '../../consts.dart';
 import '../../models/model.dart';
 import '../../models/platform_model.dart';
+import '../../shercoremoto/servidor.dart';
 import 'home_page.dart';
 
 /// Connection page for connecting to a remote peer.
@@ -86,6 +87,7 @@ class _ConnectionPageState extends State<ConnectionPage> {
             delegate: SliverChildListDelegate([
           if (!bind.isCustomClient() && !isIOS)
             Obx(() => _buildUpdateUI(stateGlobal.updateUrl.value)),
+          const ShercoSelectorServidor(compacto: true),
           _buildRemoteIDTextField(),
         ])),
         SliverFillRemaining(

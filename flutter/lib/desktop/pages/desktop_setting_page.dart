@@ -24,6 +24,7 @@ import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../common/widgets/dialog.dart';
 import '../../common/widgets/login.dart';
+import '../../shercoremoto/servidor.dart';
 
 const double _kTabWidth = 200;
 const double _kTabHeight = 42;
@@ -1862,6 +1863,8 @@ class _NetworkState extends State<_Network> with AutomaticKeepAliveClientMixin {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const ShercoSelectorServidor(),
+              divider,
               if (!hideServer)
                 listTile(
                   icon: Icons.dns_outlined,
