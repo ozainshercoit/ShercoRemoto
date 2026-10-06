@@ -17,7 +17,7 @@ final ValueNotifier<String> shercoModoServidor = ValueNotifier<String>(_leerModo
 String _leerModo() {
   final guardado = bind.mainGetLocalOption(key: _kModo);
   if (guardado == 'publico' || guardado == 'sherco') return guardado;
-  final custom = bind.mainGetOption(key: 'custom-rendezvous-server');
+  final custom = bind.mainGetOptionSync(key: 'custom-rendezvous-server');
   return custom.contains('rustdesk.com') ? 'publico' : 'sherco';
 }
 
