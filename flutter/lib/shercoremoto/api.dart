@@ -9,8 +9,10 @@ import 'package:http/http.dart' as http;
 import '../models/platform_model.dart';
 import 'secure_store.dart';
 
-/// Default API. The local option `shercoremoto-api` overrides it without a rebuild.
-const kShercoApiDefault = 'https://test.shercoit.com/api/shercoremoto';
+/// Default API: production (shercoit.com) since 20/11/2026; before it was test.
+/// The local option `shercoremoto-api` overrides it without a rebuild, e.g.
+/// `https://test.shercoit.com/api/shercoremoto` to use the test environment.
+const kShercoApiDefault = 'https://shercoit.com/api/shercoremoto';
 
 class ShercoApiError implements Exception {
   final int status;
